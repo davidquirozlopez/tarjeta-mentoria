@@ -17,13 +17,14 @@
 
         body {
             margin: 0;
-            padding: 20px;
+            padding: 10px; /* Reducimos un poco el relleno */
             font-family: 'Montserrat', system-ui, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            min-height: 100vh;
-            background-color: transparent; 
+            /* Eliminamos el min-height: 100vh; */
+            background-color: transparent;
+            overflow: hidden; /* Esto es clave: fuerza a que nunca aparezcan barras de scroll */
         }
 
         .card {
