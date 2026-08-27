@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mentoría Semanal - Maestríanimal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- Se actualiza la fuente a Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary: #007f91;
             --secondary: #ca6700;
-            --bg-color: #fbfaf8; /* Blanco roto */
+            --bg-color: #fbfaf8; 
             --text-main: #333333;
             --text-muted: #666666;
         }
@@ -17,60 +18,84 @@
         body {
             margin: 0;
             padding: 20px;
-            font-family: 'Inter', system-ui, sans-serif;
+            font-family: 'Montserrat', system-ui, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background-color: transparent; /* Permite integrarse bien como iframe */
+            background-color: transparent; 
         }
 
         .card {
             background: var(--bg-color);
             border-radius: 12px;
             padding: 2.5rem 2rem;
-            max-width: 450px;
+            max-width: 800px;
             width: 100%;
             text-align: center;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-            border: 1px solid #eaeaea;
+            /* Sombra principal más difuminada y elegante */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            /* Borde superior usando el color secundario */
+            border-top: 6px solid var(--secondary);
+            border-left: 1px solid #eaeaea;
+            border-right: 1px solid #eaeaea;
+            border-bottom: 1px solid #eaeaea;
             box-sizing: border-box;
         }
 
         h2 {
             color: var(--text-main);
             margin: 0 0 0.5rem 0;
-            font-size: 1.5rem;
+            font-size: 1.4rem;
+            font-weight: 700;
         }
 
         .schedule {
             color: var(--text-muted);
             font-weight: 600;
-            margin-bottom: 2rem;
+            margin-bottom: 2.5rem;
             font-size: 0.95rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .flag-icon {
+            width: 20px;
+            height: auto;
+            border-radius: 2px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         .timer-container {
             display: flex;
             justify-content: center;
             gap: 1rem;
-            margin-bottom: 2rem;
-            min-height: 70px;
+            margin-bottom: 2.5rem;
+            min-height: 75px;
             align-items: center;
         }
 
         .time-block {
             background: #ffffff;
-            border: 1px solid #e0e0e0;
-            border-radius: 8px;
-            width: 65px;
-            padding: 12px 0;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+            /* Bordes más suaves */
+            border: 1px solid rgba(0, 127, 145, 0.08); 
+            border-radius: 10px;
+            width: 68px;
+            padding: 14px 0;
+            /* Sombra pronunciada para dar efecto flotante */
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .time-block:hover {
+            transform: translateY(-2px); /* Pequeña interacción al pasar el cursor */
         }
 
         .time-block span {
             display: block;
-            font-size: 1.5rem;
+            font-size: 1.6rem;
             font-weight: 700;
             color: var(--primary);
         }
@@ -82,6 +107,7 @@
             letter-spacing: 0.5px;
             margin-top: 4px;
             display: block;
+            font-weight: 600;
         }
 
         .live-message {
@@ -102,24 +128,29 @@
             background: var(--primary);
             color: #ffffff;
             text-decoration: none;
-            padding: 14px 24px;
+            padding: 15px 24px;
             border-radius: 8px;
             font-weight: 600;
             transition: all 0.3s ease;
             width: 100%;
             box-sizing: border-box;
             font-size: 1rem;
+            border: 1px solid transparent;
         }
 
         .btn:hover:not(.disabled) {
-            background: #006674;
+            /* Al pasar el cursor, cambia al color secundario */
+            background: var(--secondary);
             transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(202, 103, 0, 0.3); /* Sombra también adaptada al tono */
         }
 
         .btn.disabled {
-            background: #e0e0e0;
+            /* Color tenue basado en tu color principal */
+            background: #e6f2f4; 
             cursor: not-allowed;
-            color: #888888;
+            color: #65a1ab;
+            border: 1px solid #cce5e8;
         }
     </style>
 </head>
@@ -127,7 +158,10 @@
 
     <div class="card">
         <h2>Mentoría Semanal en Vivo</h2>
-        <p class="schedule">Jueves • 12:00 pm - 1:00 pm (Colombia)</p>
+        <p class="schedule">
+            Jueves • 12:00 pm - 1:00 pm 
+            <img src="https://flagcdn.com/w20/co.png" srcset="https://flagcdn.com/w40/co.png 2x" alt="Colombia" class="flag-icon">
+        </p>
         
         <div id="timer-display" class="timer-container">
             <!-- El contador se inyectará aquí -->
@@ -142,34 +176,27 @@
         const zoomLink = "https://us06web.zoom.us/j/81503371852?pwd=bMdapuAsLXNx5NU28u2SUS6XWTeb0t.1";
         
         function getBogotaTime() {
-            // Obtenemos la hora actual mapeada específicamente a la zona horaria de Bogotá
             const str = new Date().toLocaleString("en-US", {timeZone: "America/Bogota"});
             return new Date(str);
         }
 
         function updateLogic() {
             const bogotaNow = getBogotaTime();
-            const day = bogotaNow.getDay(); // 0 = Domingo, 4 = Jueves
+            const day = bogotaNow.getDay(); 
             const hour = bogotaNow.getHours(); 
             const min = bogotaNow.getMinutes();
 
             const isThursday = day === 4;
             
-            // La sesión está en curso (Jueves de 12:00 PM a 12:59 PM)
             const isLive = isThursday && hour === 12; 
-            
-            // La sala de espera de 5 min (Jueves de 11:55 AM a 11:59 AM)
             const isPreRoom = isThursday && hour === 11 && min >= 55; 
-            
             const isActiveWindow = isLive || isPreRoom;
 
-            // Calcular el próximo jueves a las 12:00 PM
             let nextThursday = new Date(bogotaNow);
             nextThursday.setHours(12, 0, 0, 0);
 
             let daysToAdd = (4 - day + 7) % 7;
             
-            // Si es jueves y ya pasó la 1:00 PM, apuntar a la próxima semana
             if (isThursday && hour >= 13) {
                 daysToAdd = 7; 
             }
@@ -178,11 +205,9 @@
 
             const diff = nextThursday.getTime() - bogotaNow.getTime();
 
-            // Elementos del DOM
             const btn = document.getElementById('zoom-btn');
             const timerDisplay = document.getElementById('timer-display');
 
-            // Lógica del botón
             if (isActiveWindow) {
                 btn.href = zoomLink;
                 btn.classList.remove('disabled');
@@ -195,7 +220,6 @@
                 btn.onclick = (e) => e.preventDefault();
             }
 
-            // Lógica del temporizador
             if (isLive) {
                 timerDisplay.innerHTML = '<div class="live-message">¡Estamos en vivo!</div>';
             } else {
@@ -204,7 +228,6 @@
                 let m = Math.floor((diff / 1000 / 60) % 60);
                 let s = Math.floor((diff / 1000) % 60);
 
-                // Añadir ceros a la izquierda
                 h = h < 10 ? "0" + h : h;
                 m = m < 10 ? "0" + m : m;
                 s = s < 10 ? "0" + s : s;
@@ -218,7 +241,6 @@
             }
         }
 
-        // Actualizar cada segundo
         setInterval(updateLogic, 1000);
         updateLogic();
     </script>
