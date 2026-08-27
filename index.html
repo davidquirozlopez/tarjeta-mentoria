@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mentoría Semanal - Maestríanimal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #007f91;
+            --secondary: #ca6700;
+            --bg-color: #fbfaf8; /* Blanco roto */
+            --text-main: #333333;
+            --text-muted: #666666;
+        }
+
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Inter', system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: transparent; /* Permite integrarse bien como iframe */
+        }
+
+        .card {
+            background: var(--bg-color);
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            max-width: 450px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eaeaea;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            color: var(--text-main);
+            margin: 0 0 0.5rem 0;
+            font-size: 1.5rem;
+        }
+
+        .schedule {
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
+        }
+
+        .timer-container {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            min-height: 70px;
+            align-items: center;
+        }
+
+        .time-block {
+            background: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            width: 65px;
+            padding: 12px 0;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+        }
+
+        .time-block span {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .time-block small {
+            font-size: 0.7rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .live-message {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--secondary);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+
+        .btn {
+            display: inline-block;
+            background: var(--primary);
+            color: #ffffff;
+            text-decoration: none;
+            padding: 14px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+
+        .btn:hover:not(.disabled) {
+            background: #006674;
+            transform: translateY(-2px);
+        }
+
+        .btn.disabled {
+            background: #e0e0e0;
+            cursor: not-allowed;
+            color: #888888;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <h2>Mentoría Semanal en Vivo</h2>
+        <p class="schedule">Jueves • 12:00 pm - 1:00 pm (Colombia)</p>
+        
+        <div id="timer-display" class="timer-container">
+            <!-- El contador se inyectará aquí -->
+        </div>
+        
+        <a id="zoom-btn" href="#" class="btn disabled" target="_blank" rel="noopener noreferrer">
+            La sala abre 5 minutos antes
+        </a>
+    </div>
+
+    <script>
+        const zoomLink = "https://us06web.zoom.us/j/81503371852?pwd=bMdapuAsLXNx5NU28u2SUS6XWTeb0t.1";
+        
+        function getBogotaTime() {
+            // Obtenemos la hora actual mapeada específicamente a la zona horaria de Bogotá
+            const str = new Date().toLocaleString("en-US", {timeZone: "America/Bogota"});
+            return new Date(str);
+        }
+
+        function updateLogic() {
+            const bogotaNow = getBogotaTime();
+            const day = bogotaNow.getDay(); // 0 = Domingo, 4 = Jueves
+            const hour = bogotaNow.getHours(); 
+            const min = bogotaNow.getMinutes();
+
+            const isThursday = day === 4;
+            
+            // La sesión está en curso (Jueves de 12:00 PM a 12:59 PM)
+            const isLive = isThursday && hour === 12; 
+            
+            // La sala de espera de 5 min (Jueves de 11:55 AM a 11:59 AM)
+            const isPreRoom = isThursday && hour === 11 && min >= 55; 
+            
+            const isActiveWindow = isLive || isPreRoom;
+
+            // Calcular el próximo jueves a las 12:00 PM
+            let nextThursday = new Date(bogotaNow);
+            nextThursday.setHours(12, 0, 0, 0);
+
+            let daysToAdd = (4 - day + 7) % 7;
+            
+            // Si es jueves y ya pasó la 1:00 PM, apuntar a la próxima semana
+            if (isThursday && hour >= 13) {
+                daysToAdd = 7; 
+            }
+            
+            nextThursday.setDate(bogotaNow.getDate() + daysToAdd);
+
+            const diff = nextThursday.getTime() - bogotaNow.getTime();
+
+            // Elementos del DOM
+            const btn = document.getElementById('zoom-btn');
+            const timerDisplay = document.getElementById('timer-display');
+
+            // Lógica del botón
+            if (isActiveWindow) {
+                btn.href = zoomLink;
+                btn.classList.remove('disabled');
+                btn.innerText = "Acceder a la Mentoría";
+                btn.onclick = null;
+            } else {
+                btn.removeAttribute('href');
+                btn.classList.add('disabled');
+                btn.innerText = "La sala abre 5 minutos antes";
+                btn.onclick = (e) => e.preventDefault();
+            }
+
+            // Lógica del temporizador
+            if (isLive) {
+                timerDisplay.innerHTML = '<div class="live-message">¡Estamos en vivo!</div>';
+            } else {
+                let d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                let h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                let m = Math.floor((diff / 1000 / 60) % 60);
+                let s = Math.floor((diff / 1000) % 60);
+
+                // Añadir ceros a la izquierda
+                h = h < 10 ? "0" + h : h;
+                m = m < 10 ? "0" + m : m;
+                s = s < 10 ? "0" + s : s;
+
+                timerDisplay.innerHTML = `
+                    <div class="time-block"><span>${d}</span><small>Días</small></div>
+                    <div class="time-block"><span>${h}</span><small>Horas</small></div>
+                    <div class="time-block"><span>${m}</span><small>Min</small></div>
+                    <div class="time-block"><span>${s}</span><small>Seg</small></div>
+                `;
+            }
+        }
+
+        // Actualizar cada segundo
+        setInterval(updateLogic, 1000);
+        updateLogic();
+    </script>
+</body>
+</html>
