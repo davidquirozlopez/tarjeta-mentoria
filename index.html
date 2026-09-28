@@ -17,14 +17,13 @@
 
         body {
             margin: 0;
-            padding: 20px; /* Reducimos un poco el relleno */
+            padding: 20px;
             font-family: 'Montserrat', system-ui, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            /* Eliminamos el min-height: 100vh; */
             background-color: transparent;
-            overflow: hidden; /* Esto es clave: fuerza a que nunca aparezcan barras de scroll */
+            overflow: hidden; 
         }
 
         .card {
@@ -34,9 +33,7 @@
             max-width: 800px;
             width: 100%;
             text-align: center;
-            /* Sombra principal más difuminada y elegante */
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            /* Borde superior usando el color secundario */
             border-top: 6px solid var(--secondary);
             border-left: 1px solid #eaeaea;
             border-right: 1px solid #eaeaea;
@@ -49,6 +46,18 @@
             margin: 0 0 0.5rem 0;
             font-size: 1.4rem;
             font-weight: 700;
+        }
+        
+        .announcement {
+            background-color: rgba(202, 103, 0, 0.1);
+            color: var(--secondary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin: 0 auto 1.5rem auto;
+            font-weight: 600;
+            font-size: 0.95rem;
+            border: 1px solid rgba(202, 103, 0, 0.2);
+            display: none; /* Oculto por defecto, JS lo controla */
         }
 
         .schedule {
@@ -80,18 +89,16 @@
 
         .time-block {
             background: #ffffff;
-            /* Bordes más suaves */
             border: 1px solid rgba(0, 127, 145, 0.08); 
             border-radius: 10px;
             width: 68px;
             padding: 14px 0;
-            /* Sombra pronunciada para dar efecto flotante */
             box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s ease;
         }
 
         .time-block:hover {
-            transform: translateY(-2px); /* Pequeña interacción al pasar el cursor */
+            transform: translateY(-2px);
         }
 
         .time-block span {
@@ -140,14 +147,12 @@
         }
 
         .btn:hover:not(.disabled) {
-            /* Al pasar el cursor, cambia al color secundario */
             background: var(--secondary);
             transform: translateY(-2px);
-            box-shadow: 0 4px 10px rgba(202, 103, 0, 0.3); /* Sombra también adaptada al tono */
+            box-shadow: 0 4px 10px rgba(202, 103, 0, 0.3);
         }
 
         .btn.disabled {
-            /* Color tenue basado en tu color principal */
             background: #e6f2f4; 
             cursor: not-allowed;
             color: #65a1ab;
@@ -159,6 +164,12 @@
 
     <div class="card">
         <h2>Mentoría Semanal en Vivo</h2>
+        
+        <!-- Anuncio Especial para el 15 de octubre -->
+        <div id="special-announcement" class="announcement">
+            ⚠️ ¡Atención! Nuestra próxima sesión será el jueves 15 de octubre.
+        </div>
+
         <p class="schedule">
             Jueves • 12:00 pm - 1:00 pm 
             <img src="https://flagcdn.com/w20/co.png" srcset="https://flagcdn.com/w40/co.png 2x" alt="Colombia" class="flag-icon">
@@ -183,28 +194,58 @@
 
         function updateLogic() {
             const bogotaNow = getBogotaTime();
+            const currentYear = bogotaNow.getFullYear();
+            
             const day = bogotaNow.getDay(); 
             const hour = bogotaNow.getHours(); 
             const min = bogotaNow.getMinutes();
 
-            const isThursday = day === 4;
+            // Lógica de la fecha excepcional (15 de octubre)
+            const targetMonth = 9; // Octubre es 9 (es cero-indexado en JS)
+            const targetDate = 15;
+            // El fin de la excepción es el 15 de oct a la 1:00 PM (13:00)
+            const exceptionEnd = new Date(currentYear, targetMonth, targetDate, 13, 0, 0);
             
-            const isLive = isThursday && hour === 12; 
-            const isPreRoom = isThursday && hour === 11 && min >= 55; 
-            const isActiveWindow = isLive || isPreRoom;
+            const isExceptionActive = bogotaNow < exceptionEnd;
+            const announcementElem = document.getElementById('special-announcement');
 
-            let nextThursday = new Date(bogotaNow);
-            nextThursday.setHours(12, 0, 0, 0);
+            let nextSession;
+            let isLive = false;
+            let isPreRoom = false;
 
-            let daysToAdd = (4 - day + 7) % 7;
-            
-            if (isThursday && hour >= 13) {
-                daysToAdd = 7; 
+            if (isExceptionActive) {
+                // Mostrar el anuncio
+                announcementElem.style.display = 'block';
+                
+                // Fijar el objetivo al 15 de octubre a las 12:00 PM
+                nextSession = new Date(currentYear, targetMonth, targetDate, 12, 0, 0);
+                
+                // Comprobar si estamos en vivo (solo el 15 de octubre)
+                if (bogotaNow.getMonth() === targetMonth && bogotaNow.getDate() === targetDate) {
+                    if (hour === 12) isLive = true;
+                    if (hour === 11 && min >= 55) isPreRoom = true;
+                }
+            } else {
+                // Ocultar el anuncio y regresar a la normalidad
+                announcementElem.style.display = 'none';
+
+                const isThursday = day === 4;
+                isLive = isThursday && hour === 12; 
+                isPreRoom = isThursday && hour === 11 && min >= 55; 
+
+                nextSession = new Date(bogotaNow);
+                nextSession.setHours(12, 0, 0, 0);
+
+                let daysToAdd = (4 - day + 7) % 7;
+                if (isThursday && hour >= 13) {
+                    daysToAdd = 7; 
+                }
+                
+                nextSession.setDate(bogotaNow.getDate() + daysToAdd);
             }
-            
-            nextThursday.setDate(bogotaNow.getDate() + daysToAdd);
 
-            const diff = nextThursday.getTime() - bogotaNow.getTime();
+            const isActiveWindow = isLive || isPreRoom;
+            const diff = nextSession.getTime() - bogotaNow.getTime();
 
             const btn = document.getElementById('zoom-btn');
             const timerDisplay = document.getElementById('timer-display');
