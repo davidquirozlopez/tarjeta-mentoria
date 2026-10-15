@@ -204,7 +204,7 @@
             const targetMonth = 9; // Octubre es 9 (es cero-indexado en JS)
             const targetDate = 15;
             // El fin de la excepción es el 15 de oct a la 1:00 PM (13:00)
-            const exceptionEnd = new Date(currentYear, targetMonth, targetDate, 13, 0, 0);
+            const exceptionEnd = new Date(currentYear, targetMonth, targetDate, 11, 0, 0);
             
             const isExceptionActive = bogotaNow < exceptionEnd;
             const announcementElem = document.getElementById('special-announcement');
